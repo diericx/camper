@@ -1,0 +1,37 @@
+{
+  "device_id": "rear-camera-001",
+  "device_type": "rear-camera",
+  "api_port": 5001,
+  "main_controller": {
+    "ip": "192.168.4.1",
+    "port": 5000
+  },
+  "heartbeat": {
+    "interval_seconds": 30,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 5
+  },
+  "device_specific": {
+    "camera": {
+      "movement_duration_seconds": 2.0,
+      "position_limits": {
+        "up_degrees": 90,
+        "down_degrees": -30
+      },
+      "servo_pin": 18,
+      "movement_speed": "slow"
+    }
+  },
+  "network": {
+    "wifi_ssid": "CamperControl",
+    "wifi_password": "camper123",
+    "static_ip": null,
+    "dhcp": true
+  },
+  "logging": {
+    "level": "INFO",
+    "log_dir": "logs",
+    "file": "logs/rear_camera.log"
+  },
+  "debug": false
+}
