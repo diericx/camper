@@ -8,9 +8,12 @@ from enum import Enum
 from flask import Flask, json, request, jsonify
 import logging
 import os
-from datetime import datetime 
+from datetime import datetime , timedelta
+import threading
 import time
 import config
+
+DEVICE_EXPIRE_SECONDS = 30  
 
 app, logger = config.setupFlaskApp()
 
@@ -32,6 +35,23 @@ class Device:
 
 devices: Device = {}
 
+def cleanup_stale_devices():
+    """Remove devices that haven't been seen recently"""
+    current_time = time.time()
+    expired_devices = []
+    
+    for device_id, device in devices.items():
+        if current_time - device.last_seen > DEVICE_EXPIRE_SECONDS:
+            expired_devices.append(device_id)
+    
+    for device_id in expired_devices:
+        logger.info(f"Removing stale device: {device_id}")
+        del devices[device_id]
+    
+    # Schedule next cleanup
+    threading.Timer(1.0, cleanup_stale_devices).start()
+
+cleanup_stale_devices()
 
 @app.route('/api/v1/device/<device_id>', methods=['PUT'])
 def update_device(device_id):
