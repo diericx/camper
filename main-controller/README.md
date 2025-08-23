@@ -17,6 +17,41 @@ A simple Flask API designed for Raspberry Pi device control as part of the campe
 
 ## Quick Start
 
+### Device Setup
+
+Make sure the other network device exists (wlan1 via usb)
+
+```
+$ sudo nmcli device
+wlan0          wifi      connected               preconfigured
+lo             loopback  connected (externally)  lo
+wlan1          wifi      disconnected            --
+p2p-dev-wlan0  wifi-p2p  disconnected            --
+p2p-dev-wlan1  wifi-p2p  disconnected            --
+```
+
+Switch main config to the dongle and setup networks
+
+```
+sudo nmcli connection modify preconfigured connection.interface-name wlan1
+sudo nmcli connection up preconfigured
+# Wifi cuts out here
+sudo nmcli connection add type wifi con-name "<SSID>" ifname wlan1 ssid "<SSID>" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "<PASSWORD>"
+```
+
+Set up the hotspot
+
+```shell-session
+sudo nmcli device wifi hotspot ssid CamperController password campercontroller ifname wlan0
+```
+
+Install git and python
+
+```
+sudo apt update
+sudo apt install git python3
+```
+
 ### Development Mode
 
 1. **Clone and navigate to the project:**

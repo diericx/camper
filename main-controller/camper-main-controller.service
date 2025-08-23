@@ -5,8 +5,8 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=zac
-Group=zac
+User=pi
+Group=pi
 WorkingDirectory=/home/pi/camper/main-controller
 Environment=FLASK_ENV=production
 Environment=PYTHONPATH=/home/pi/camper/main-controller
