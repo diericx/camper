@@ -4,34 +4,40 @@ Main Controller Flask API
 A simple Flask API for Raspberry Pi device control
 """
 
-from flask import Flask, request, jsonify
+from enum import Enum
+from flask import Flask, json, request, jsonify
 import logging
 import os
-from datetime import datetime
+from datetime import datetime 
+import time
+import config
 
-# Initialize Flask app
-app = Flask(__name__)
+app, logger = config.setupFlaskApp()
 
-# Configure logging for Raspberry Pi debugging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('main-controller.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+class DeviceType(Enum):
+    REAR_CAMERA = "REAR_CAMERA"
 
-# Basic configuration
-app.config['DEBUG'] = False
-app.config['HOST'] = '0.0.0.0'  # Allow external connections for Pi
-app.config['PORT'] = 8080  # Changed from 5000 to avoid conflicts with AirTunes
+class Device:
+    def __init__(self, device_type: DeviceType, addr: str):
+        self.device_type = device_type
+        self.addr = addr
+        self.last_seen = time.time()
+
+    def __str__(self):
+        return json.dumps({
+            "device_type": self.device_type.value,  # Use .value to get the string
+            "addr": self.addr,
+            "last_seen": str(self.last_seen)
+        })
+
+devices: Device = {}
+
 
 @app.route('/api/v1/device/<device_id>', methods=['PUT'])
 def update_device(device_id):
     """
-    Update device information
+    If this device doesn't exist, register it with information from the client.
+    If it does exist, update any info.
     
     Args:
         device_id (str): The device identifier
@@ -51,10 +57,31 @@ def update_device(device_id):
         # Get request data (for future use)
         request_data = request.get_json() if request.is_json else {}
         logger.info(f"Request data: {request_data}")
-        
-        # TODO: Implement actual device update logic here
-        # For now, just return success response
-        
+
+        if not request_data["device_type"]:
+            logger.warning(f"Missing device type")
+            return jsonify({"error": "Invalid device type"}), 400
+
+        device_type = None
+        try:
+            device_type = DeviceType[str(request_data["device_type"])]
+        except KeyError:
+            logger.warning(f"Invalid Device Type")
+            return jsonify({"error": "Invalid device type"}), 400
+    
+        device = devices.get(device_id)
+        if device is None:
+            devices[device_id] = Device(device_type, request.remote_addr)
+            device = devices[device_id]
+        else:
+            # If the device is already registered and we get a put from a diff
+            # IP, error out
+            if device.addr != request.remote_addr:
+                logger.warning(f"Device already registered, cannot register again")
+                return jsonify({"error": "Device already registered"}), 400
+
+            device.last_seen = time.time()
+
         logger.info(f"Device {device_id} updated successfully")
         return jsonify({"status": "success"}), 200
         
