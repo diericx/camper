@@ -7,11 +7,11 @@ Wants=network.target
 Type=simple
 User=pi
 Group=pi
-WorkingDirectory=/home/pi/camper/main-controller
+WorkingDirectory=/home/zac/camper/main-controller
 Environment=FLASK_ENV=production
-Environment=PYTHONPATH=/home/pi/camper/main-controller
-ExecStartPre=/bin/bash -c 'cd /home/pi/camper/main-controller && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt'
-ExecStart=/bin/bash -c 'cd /home/pi/camper/main-controller && source venv/bin/activate && python3 app.py'
+Environment=PYTHONPATH=/home/zac/camper/main-controller
+ExecStartPre=/bin/bash -c 'cd /home/zac/camper/main-controller && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt'
+ExecStart=/bin/bash -c 'cd /home/zac/camper/main-controller && source venv/bin/activate && python3 app.py'
 Restart=always
 RestartSec=10
 StandardOutput=journal
