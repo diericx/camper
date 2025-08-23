@@ -44,13 +44,13 @@ def update_device(device_id):
         request_data = request.get_json() if request.is_json else {}
         logger.info(f"Request data: {request_data}")
 
-        if not request_data["device_type"]:
+        if not request_data["device-type"]:
             logger.warning(f"Missing device type")
             return jsonify({"error": "Invalid device type"}), 400
 
         device_type = None
         try:
-            device_type = DeviceType[str(request_data["device_type"])]
+            device_type = DeviceType[str(request_data["device-type"])]
         except KeyError:
             logger.warning(f"Invalid Device Type")
             return jsonify({"error": "Invalid device type"}), 400
@@ -73,6 +73,20 @@ def update_device(device_id):
         
     except Exception as e:
         logger.error(f"Error updating device {device_id}: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/v1/devices', methods=['GET'])
+def get_devices():
+    try:
+        devices_array = []
+        for device_id, device in devices.items():
+            device_data = json.loads(str(device))  # Parse the JSON string from __str__
+            device_data['device_id'] = device_id
+            devices_array.append(device_data)
+        
+        return jsonify(devices_array), 200
+    except Exception as e:
+        logger.error(f"Error listing devices: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/health', methods=['GET'])
