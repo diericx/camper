@@ -32,7 +32,7 @@ fi
 
 # Update the service file with the correct paths
 echo "Updating service file with current paths..."
-sed -i "s|/home/zac/camper/main-controller|$CURRENT_DIR|g" "$SERVICE_FILE"
+sed -i "s|/home/pi/camper/main-controller|$CURRENT_DIR|g" "$SERVICE_FILE"
 
 # Copy service file to systemd directory
 echo "Copying service file to $SYSTEMD_DIR..."
