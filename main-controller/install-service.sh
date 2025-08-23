@@ -15,6 +15,8 @@ echo "Installing Camper Main Controller Service..."
 echo "Current directory: $CURRENT_DIR"
 echo "Project directory: $PROJECT_DIR"
 
+source setup-pyenv.sh
+
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root (use sudo)"
