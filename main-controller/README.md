@@ -5,15 +5,19 @@ A simple Flask API designed for Raspberry Pi device control as part of the campe
 ## Features
 
 - **PUT /api/v1/device/{id}** - Update device information
+- **GET /api/v1/devices** - List all registered devices
 - **GET /health** - Health check endpoint
+- Device cleanup (removes stale devices automatically)
 - Basic error handling and validation
 - Logging for debugging on Raspberry Pi
-- Network accessible (0.0.0.0:8080)
+- Network accessible (0.0.0.0)
+- Production/Development mode support
+- Systemd service for auto-start on boot
 - Minimal dependencies
 
 ## Quick Start
 
-### On Raspberry Pi
+### Development Mode
 
 1. **Clone and navigate to the project:**
 
@@ -31,7 +35,42 @@ A simple Flask API designed for Raspberry Pi device control as part of the campe
 
    - Create a virtual environment if needed
    - Install dependencies
-   - Start the Flask API on port 5000
+   - Start the Flask API on port 8080 (development) or port 80 (production)
+
+### Production Mode (Systemd Service)
+
+For production deployment with auto-start on boot:
+
+1. **Install as a systemd service:**
+
+   ```bash
+   sudo ./install-service.sh
+   ```
+
+   This will:
+
+   - Install the service to start on boot
+   - Run in production mode on port 80
+   - Automatically restart if it crashes
+   - Log to system journal
+
+2. **Service management commands:**
+
+   ```bash
+   # Check status
+   sudo systemctl status camper-main-controller
+
+   # Start/stop/restart
+   sudo systemctl start camper-main-controller
+   sudo systemctl stop camper-main-controller
+   sudo systemctl restart camper-main-controller
+
+   # View logs
+   sudo journalctl -u camper-main-controller -f
+
+   # Disable auto-start
+   sudo systemctl disable camper-main-controller
+   ```
 
 ### Manual Setup
 
@@ -58,17 +97,36 @@ A simple Flask API designed for Raspberry Pi device control as part of the campe
 ### Update Device
 
 - **URL:** `PUT /api/v1/device/{id}`
-- **Description:** Update device information
+- **Description:** Register or update device information
 - **Parameters:**
   - `id` (path parameter): Device identifier
-- **Request Body:** JSON (optional)
+- **Request Body:** JSON with device_type
+  ```json
+  { "device_type": "REAR_CAMERA" }
+  ```
 - **Success Response:**
   ```json
   { "status": "success" }
   ```
 - **Error Responses:**
-  - `400`: `{"error": "Invalid device ID"}`
+  - `400`: `{"error": "Invalid device ID"}` or `{"error": "Invalid device type"}`
   - `500`: `{"error": "Internal server error"}`
+
+### List Devices
+
+- **URL:** `GET /api/v1/devices`
+- **Description:** Get list of all registered devices
+- **Success Response:**
+  ```json
+  [
+    {
+      "device_id": "rear-camera",
+      "device_type": "REAR_CAMERA",
+      "addr": "192.168.1.100",
+      "last_seen": "2025-08-23T18:42:00.123456"
+    }
+  ]
+  ```
 
 ### Health Check
 
@@ -85,35 +143,75 @@ A simple Flask API designed for Raspberry Pi device control as part of the campe
 
 ## Usage Examples
 
-### Using curl
+### Using curl (Development Mode - Port 8080)
 
 ```bash
 # Health check
 curl http://localhost:8080/health
 
-# Update device
-curl -X PUT http://localhost:8080/api/v1/device/sensor-01 \
+# Register/update device
+curl -X PUT http://localhost:8080/api/v1/device/rear-camera \
   -H "Content-Type: application/json" \
-  -d '{"status": "active"}'
+  -d '{"device_type": "REAR_CAMERA"}'
+
+# List all devices
+curl http://localhost:8080/api/v1/devices
+```
+
+### Using curl (Production Mode - Port 80)
+
+```bash
+# Health check
+curl http://localhost/health
+
+# Register/update device
+curl -X PUT http://localhost/api/v1/device/rear-camera \
+  -H "Content-Type: application/json" \
+  -d '{"device_type": "REAR_CAMERA"}'
+
+# List all devices
+curl http://localhost/api/v1/devices
 ```
 
 ### From another device on the network
 
 ```bash
 # Replace RASPBERRY_PI_IP with your Pi's IP address
-curl -X PUT http://RASPBERRY_PI_IP:8080/api/v1/device/sensor-01 \
+# Development mode (port 8080)
+curl -X PUT http://RASPBERRY_PI_IP:8080/api/v1/device/rear-camera \
   -H "Content-Type: application/json" \
-  -d '{"status": "active"}'
+  -d '{"device_type": "REAR_CAMERA"}'
+
+# Production mode (port 80)
+curl -X PUT http://RASPBERRY_PI_IP/api/v1/device/rear-camera \
+  -H "Content-Type: application/json" \
+  -d '{"device_type": "REAR_CAMERA"}'
 ```
 
 ## Configuration
 
-The API is configured for Raspberry Pi deployment:
+The API automatically configures based on environment:
+
+### Development Mode (default)
 
 - **Host:** 0.0.0.0 (accepts connections from any IP)
 - **Port:** 8080
-- **Debug:** False (production mode)
+- **Debug:** True
+- **Environment:** Set `FLASK_ENV=development` or leave unset
+
+### Production Mode
+
+- **Host:** 0.0.0.0 (accepts connections from any IP)
+- **Port:** 80 (requires root/sudo)
+- **Debug:** False
+- **Environment:** Set `FLASK_ENV=production`
 - **Logging:** File (`main-controller.log`) and console output
+
+### Device Management
+
+- **Device Expiry:** 30 seconds (devices are removed if not seen)
+- **Cleanup Interval:** 1 second
+- **Supported Device Types:** REAR_CAMERA (extensible)
 
 ## Logging
 
@@ -128,11 +226,14 @@ Log format includes timestamp, log level, and message for easy debugging.
 
 ```
 main-controller/
-├── app.py              # Main Flask application
-├── requirements.txt    # Python dependencies
-├── run.sh             # Startup script (executable)
-├── README.md          # This file
-└── main-controller.log # Log file (created when running)
+├── app.py                          # Main Flask application
+├── config.py                       # Configuration and Flask setup
+├── requirements.txt                # Python dependencies
+├── run.sh                         # Development startup script
+├── camper-main-controller.service  # Systemd service file
+├── install-service.sh             # Service installation script
+├── README.md                      # This file
+└── main-controller.log            # Log file (created when running)
 ```
 
 ## Development
@@ -151,23 +252,43 @@ To extend the API:
 1. **Port already in use:**
 
    ```bash
-   # Find process using port 5000
-   lsof -i :5000
+   # Find process using port 8080 (dev) or 80 (prod)
+   lsof -i :8080
+   lsof -i :80
    # Kill the process if needed
    kill -9 <PID>
    ```
 
-2. **Permission denied on run.sh:**
+2. **Permission denied on scripts:**
 
    ```bash
    chmod +x run.sh
+   chmod +x install-service.sh
    ```
 
-3. **Python/pip not found:**
+3. **Port 80 permission denied:**
+
+   Production mode requires root privileges for port 80:
+
+   ```bash
+   sudo ./run.sh
+   # Or use the systemd service
+   sudo ./install-service.sh
+   ```
+
+4. **Python/pip not found:**
+
    ```bash
    # Install Python 3 and pip on Raspberry Pi
    sudo apt update
    sudo apt install python3 python3-pip python3-venv
+   ```
+
+5. **Service not starting:**
+   ```bash
+   # Check service status and logs
+   sudo systemctl status camper-main-controller
+   sudo journalctl -u camper-main-controller -f
    ```
 
 ### Logs
@@ -185,8 +306,13 @@ The API is configured to accept connections from any IP address (0.0.0.0). To ac
    ```
 
 2. Access the API from other devices using:
+
    ```
-   http://RASPBERRY_PI_IP:5000/api/v1/device/{id}
+   # Development mode
+   http://RASPBERRY_PI_IP:8080/api/v1/device/{id}
+
+   # Production mode
+   http://RASPBERRY_PI_IP/api/v1/device/{id}
    ```
 
 ## Security Note
