@@ -42,7 +42,7 @@ void loop() {
 
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
-      http.begin("http://"+WiFi.gatewayIP().toString() + "/api/v1/device/rear-camera");
+      http.begin("http://"+WiFi.gatewayIP().toString() + ":8080/api/v1/device/rear-camera");
       http.addHeader("Content-Type", "application/json");
 
       String payload = "{\"device-type\":\"REAR_CAMERA\"}";
