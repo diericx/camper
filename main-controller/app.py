@@ -11,6 +11,8 @@ import os
 from datetime import datetime , timedelta
 import threading
 import time
+
+import requests
 import config
 
 from devices import start_stale_device_cleanup_thread, DeviceType, devices, Device
@@ -18,6 +20,29 @@ from devices import start_stale_device_cleanup_thread, DeviceType, devices, Devi
 app, logger = config.setupFlaskApp()
 
 start_stale_device_cleanup_thread(logger)
+
+@app.route('/api/v1/device/<device_id>/<action>', methods=['POST'])
+def perform_device_action(device_id, action):
+    try:
+        # Basic input validation
+        if not device_id or not device_id.strip():
+            logger.warning(f"Invalid device ID received: '{device_id}'")
+            return jsonify({"error": "Invalid device ID"}), 400
+        if not action or not action.strip():
+            logger.warning(f"Invalid action received: '{action}'")
+            return jsonify({"error": "Invalid action"}), 400
+
+        device = devices.get(device_id)
+        if device is None:
+            logger.warning(f"Device does not exist: '{device}'")
+            return jsonify({"error": "Invalid device ID"}), 400
+
+        response = requests.post(f"http://{device.addr}/api/v1/{action}")
+            
+        return jsonify(response), 200
+    except Exception as e:
+        logger.error(f"Error listing devices: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/api/v1/device/<device_id>', methods=['PUT'])
 def update_device(device_id):
