@@ -34,6 +34,10 @@ void setup() {
   Serial.println(WiFi.localIP()); // Print the assigned IP address
   Serial.print("Gateway IP address: ");
   Serial.println(WiFi.gatewayIP());
+
+  // Start http server
+  // TODO: reconnect below?
+  server.begin();
 }
 
 // Sends a heartbeat to the api server periodically
@@ -83,6 +87,7 @@ void handleHTTPRequests() {
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
+          Serial.println("Got data!");
           // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
           // and a content-type so the client knows what's coming, then a blank line:
           client.println("HTTP/1.1 200 OK");
@@ -125,4 +130,5 @@ void loop() {
   }
 
   handleHeartbeat();
+  handleHTTPRequests();
 }
