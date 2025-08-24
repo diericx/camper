@@ -28,6 +28,7 @@ void setup() {
   WiFi.begin(SECRET_SSID, SECRET_PASS); 
 
   // Wait for the connection to establish
+  // TODO: I've seen it loop here, where a restart fixed... do we need to retry?
   while (WiFi.status() != WL_CONNECTED) {
     delay(500); // Wait for half a second
     Serial.print("."); // Print a dot to indicate connection progress
