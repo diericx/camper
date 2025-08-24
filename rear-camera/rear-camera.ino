@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <Servo.h>
 #include "secrets.h"
 
 unsigned long heartbeatLastSent = 0;
@@ -7,9 +8,14 @@ const long heartbeatInterval = 5000; // 5 seconds in milliseconds
 const long timeoutTime = 2000;
 WiFiServer server(8080);
 
+Servo myservo = Servo();
+int servoPin = 9; // D9
+
 void setup() {
   Serial.begin(115200); // Initialize serial communication for debugging
   delay(10); // Small delay for serial port initialization
+
+  myservo.write(servoPin, 90);
 
   Serial.println();
   Serial.print("Connecting to ");
@@ -55,11 +61,11 @@ void handleHeartbeat() {
     int httpResponseCode = http.PUT(payload); // Or http.POST() for POST requests
 
     if (httpResponseCode > 0) {
-      Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+      // Serial.printf("HTTP Response code: %d\n", httpResponseCode);
       String payload = http.getString();
-      Serial.println(payload);
+      // Serial.println(payload);
     } else {
-      Serial.printf("Error code: %d\n", httpResponseCode);
+      Serial.printf("Heartbeat Error code: %d\n", httpResponseCode);
     }
     http.end(); // Free resources
   }
@@ -87,7 +93,6 @@ void handleHTTPRequests() {
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
-          Serial.println("Got data!");
           // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
           // and a content-type so the client knows what's coming, then a blank line:
           client.println("HTTP/1.1 200 OK");
@@ -95,7 +100,12 @@ void handleHTTPRequests() {
           client.println("Connection: close");
           client.println();
 
-          Serial.println(header);
+          // Basic routing
+          if (header.indexOf("POST /api/v1/action/up") >= 0) {
+            myservo.write(servoPin, 180);
+          }else if (header.indexOf("POST /api/v1/action/down") >= 0) {
+            myservo.write(servoPin, 0);
+          }
 
           client.println("{\"status\": \"ok\"}");
           
@@ -107,13 +117,12 @@ void handleHTTPRequests() {
         currentLine += c;      // add it to the end of the currentLine
       }
     }
-    // Clear the header variable
-    header = "";
-    // Close the connection
-    client.stop();
-    Serial.println("Client disconnected.");
-    Serial.println("");
   }
+
+  // Close the connection
+  client.stop();
+  Serial.println("Client disconnected.");
+  Serial.println("");
 }
 
 void loop() {
