@@ -10,12 +10,15 @@ WiFiServer server(8080);
 
 Servo myservo = Servo();
 int servoPin = 9; // D9
+int servoPos = 0;
+const int MAX_SERVO_POS = 100;
 
 void setup() {
   Serial.begin(115200); // Initialize serial communication for debugging
   delay(10); // Small delay for serial port initialization
 
-  myservo.write(servoPin, 90);
+  // Set servo position so it is known
+  myservo.write(servoPin, servoPos);
 
   Serial.println();
   Serial.print("Connecting to ");
@@ -72,6 +75,18 @@ void handleHeartbeat() {
   }
 }
 
+void moveServoSlowlyTo(int pos) {
+  while (servoPos != pos) {
+    if (servoPos < pos) {
+      servoPos += 1;
+    } if (servoPos > pos) {
+      servoPos -= 1;
+    }
+    myservo.write(servoPin, servoPos);
+    delay(10);
+  }
+}
+
 void handleHTTPRequests() {
   WiFiClient client = server.available();
   if (!client) {
@@ -94,20 +109,36 @@ void handleHTTPRequests() {
         // if the current line is blank, you got two newline characters in a row.
         // that's the end of the client HTTP request, so send a response:
         if (currentLine.length() == 0) {
+
+          // We are now past the headers and ready to read the body
+          String body = "";
+          while(client.available())
+          {
+            body += (char)client.read();
+          }
+
+          // Naively convert the body to an int
+          int position = atoi(body.c_str());
+
+          // Basic routing
+          if (header.indexOf("POST /api/v1/action/move") >= 0) {
+            if (position > MAX_SERVO_POS) {
+              client.println("HTTP/1.1 500 Internal Server Error");
+              client.println("Content-type:application/json");
+              client.println("Connection: close");
+              client.println();
+              client.printf("{\"status\": \"max servo position is %i\"}\n", MAX_SERVO_POS);
+              break;
+            }
+            moveServoSlowlyTo(position);
+          }
+
           // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
           // and a content-type so the client knows what's coming, then a blank line:
           client.println("HTTP/1.1 200 OK");
           client.println("Content-type:application/json");
           client.println("Connection: close");
           client.println();
-
-          // Basic routing
-          if (header.indexOf("POST /api/v1/action/up") >= 0) {
-            myservo.write(servoPin, 180);
-          }else if (header.indexOf("POST /api/v1/action/down") >= 0) {
-            myservo.write(servoPin, 0);
-          }
-
           client.println("{\"status\": \"ok\"}");
           
           break;
