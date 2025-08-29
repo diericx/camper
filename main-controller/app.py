@@ -142,10 +142,16 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 def moveCameraUp():
-    print("Move Camera up!")
+    device = devices.get(DeviceType.REAR_CAMERA)
+    if device is not None:
+        response = requests.post(f"http://{device.addr}/api/v1/move", 0)
+        logger.info("Camera up response: ", response)
 
 def moveCameraDown():
-    print("Move Camera Down!")
+    device = devices.get(DeviceType.REAR_CAMERA)
+    if device is not None:
+        response = requests.post(f"http://{device.addr}/api/v1/move", 95)
+        logger.info("Camera down response: ", response)
 
 if __name__ == '__main__':
     logger.info("Starting Main Controller Flask API")
