@@ -146,12 +146,16 @@ def moveCameraUp():
     if device is not None:
         response = requests.post(f"http://{device.addr}/api/v1/move", 0)
         logger.info("Camera up response: ", response)
+    else:
+        logger.inf("Camera device not registered.")
 
 def moveCameraDown():
     device = devices.get(DeviceType.REAR_CAMERA)
     if device is not None:
         response = requests.post(f"http://{device.addr}/api/v1/move", 95)
         logger.info("Camera down response: ", response)
+    else:
+        logger.inf("Camera device not registered.")
 
 if __name__ == '__main__':
     logger.info("Starting Main Controller Flask API")
