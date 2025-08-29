@@ -152,9 +152,9 @@ if __name__ == '__main__':
     logger.info(f"Running on {app.config['HOST']}:{app.config['PORT']}")
 
     # Configure IO
-    button = Button(4) 
-    button.when_activated = moveCameraUp
-    button.when_deactivated = moveCameraDown
+    button = Button(4, bounce_time=0.5) 
+    button.when_pressed = moveCameraUp
+    button.when_released = moveCameraDown
     
     app.run(
         host=app.config['HOST'],
