@@ -15,6 +15,8 @@ import time
 import requests
 import config
 
+from gpiozero import Button
+
 from devices import start_stale_device_cleanup_thread, DeviceType, devices, Device
 
 app, logger = config.setupFlaskApp()
@@ -139,9 +141,20 @@ def internal_error(error):
     logger.error(f"Internal server error: {str(error)}")
     return jsonify({"error": "Internal server error"}), 500
 
+def moveCameraUp():
+    print("Move Camera up!")
+
+def moveCameraDown():
+    print("Move Camera Down!")
+
 if __name__ == '__main__':
     logger.info("Starting Main Controller Flask API")
     logger.info(f"Running on {app.config['HOST']}:{app.config['PORT']}")
+
+    # Configure IO
+    button = Button(4) 
+    button.when_activated = moveCameraUp
+    button.when_deactivated = moveCameraDown
     
     app.run(
         host=app.config['HOST'],
