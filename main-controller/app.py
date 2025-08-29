@@ -65,11 +65,9 @@ def update_device(device_id):
             return jsonify({"error": "Invalid device ID"}), 400
         
         # Log the request for debugging
-        logger.info(f"PUT request received for device ID: {device_id}")
         
         # Get request data (for future use)
         request_data = request.get_json() if request.is_json else {}
-        logger.info(f"Request data: {request_data}")
 
         if not request_data["device-type"]:
             logger.warning(f"Missing device type")
@@ -84,6 +82,7 @@ def update_device(device_id):
     
         device = devices.get(device_id)
         if device is None:
+            logger.info(f"Added new device {device_id}")
             devices[device_id] = Device(device_type, request.remote_addr)
             device = devices[device_id]
         else:
@@ -95,7 +94,6 @@ def update_device(device_id):
 
             device.last_seen = time.time()
 
-        logger.info(f"Device {device_id} updated successfully")
         return jsonify({"status": "success"}), 200
         
     except Exception as e:
@@ -142,18 +140,26 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 def moveCameraUp():
-    device = devices.get(DeviceType.REAR_CAMERA)
+    device = devices.get("rear-camera")
     if device is not None:
-        response = requests.post(f"http://{device.addr}/api/v1/move", 0)
-        logger.info("Camera up response: ", response)
+        headers = {'Content-Type': 'application/json'}
+        try:
+            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move", data="0", headers=headers)
+            logger.info(f"Camera up response: {str(response)}")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error: {e}")
     else:
         logger.error("Camera device not registered.")
 
 def moveCameraDown():
-    device = devices.get(DeviceType.REAR_CAMERA)
+    device = devices.get("rear-camera")
     if device is not None:
-        response = requests.post(f"http://{device.addr}/api/v1/move", 95)
-        logger.info("Camera down response: ", response)
+        headers = {'Content-Type': 'application/json'}
+        try:
+            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move", data="90", headers=headers)
+            logger.info(f"Camera down response: {str(response)}")
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error: {e}")
     else:
         logger.error("Camera device not registered.")
 
