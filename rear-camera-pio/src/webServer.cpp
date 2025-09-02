@@ -67,6 +67,8 @@ void WebServer::handleHTTPRequest()
       Serial.write(c);        // print it out the serial monitor
       buffer += c;
 
+      Serial.println("Request line: ");
+      Serial.println(requestLine);
       if (requestLine == "")
       {
         if (c == '\n')
