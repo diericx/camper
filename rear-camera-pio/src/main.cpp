@@ -11,8 +11,8 @@ void setup() {
 }
 
 void loop() {
-  cameraServo.MoveServoSlowlyTo(0);
+  cameraServo.moveSlowlyTo(0);
   delay(500);
-  cameraServo.MoveServoSlowlyTo(180);
+  cameraServo.moveSlowlyTo(180);
   delay(500);
 }

@@ -10,7 +10,7 @@ private:
 
 public:
     CameraServo(int pin);
-    void MoveServoSlowlyTo(int newPos);
+    void moveSlowlyTo(int newPos);
 };
 
 #endif // CAMERASERVO_H

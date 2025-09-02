@@ -15,7 +15,7 @@ CameraServo::CameraServo(int pin)
   pos = 0;
 }
 
-void CameraServo::MoveServoSlowlyTo(int newPos)
+void CameraServo::moveSlowlyTo(int newPos)
 {
   while (pos != newPos)
   {
