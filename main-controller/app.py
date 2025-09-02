@@ -144,7 +144,7 @@ def moveCameraUp():
     if device is not None:
         headers = {'Content-Type': 'application/json'}
         try:
-            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move", data="0", headers=headers)
+            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move?pos=0", headers=headers)
             logger.info(f"Camera up response: {str(response)}")
         except requests.exceptions.ConnectionError as e:
             logger.error(f"Connection error: {e}")
@@ -156,7 +156,7 @@ def moveCameraDown():
     if device is not None:
         headers = {'Content-Type': 'application/json'}
         try:
-            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move", data="90", headers=headers)
+            response = requests.post(f"http://{device.addr}:8080/api/v1/action/move?pos=90", headers=headers)
             logger.info(f"Camera down response: {str(response)}")
         except requests.exceptions.ConnectionError as e:
             logger.error(f"Connection error: {e}")
