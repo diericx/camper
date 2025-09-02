@@ -2,9 +2,13 @@
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <HTTPClient.h>
 
 #include <cameraServo.h>
 #include <secrets.h>
+
+unsigned long heartbeatLastSent = 0;
+const long HEARTBEAT_INTERVAL = 5000; // 5 seconds in milliseconds
 
 CameraServo cameraServo(9);
 
@@ -32,6 +36,7 @@ void setup()
   if (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
     Serial.printf("WiFi Failed!\n");
+    ESP.restart();
     return;
   }
 
@@ -61,6 +66,45 @@ void setup()
   server.begin();
 }
 
+// Sends a heartbeat to the api server periodically
+void handleHeartbeat()
+{
+  unsigned long currentMillis = millis();
+  if (currentMillis - heartbeatLastSent >= HEARTBEAT_INTERVAL)
+  {
+    heartbeatLastSent = currentMillis;
+
+    HTTPClient http;
+    http.begin("http://" + WiFi.gatewayIP().toString() + ":8080/api/v1/device/rear-camera");
+    http.addHeader("Content-Type", "application/json");
+
+    String payload = "{\"device-type\":\"REAR_CAMERA\"}";
+
+    int httpResponseCode = http.PUT(payload); // Or http.POST() for POST requests
+
+    if (httpResponseCode > 0)
+    {
+      // Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+      String payload = http.getString();
+      // Serial.println(payload);
+    }
+    else
+    {
+      Serial.printf("Heartbeat Error code: %d\n", httpResponseCode);
+    }
+    http.end(); // Free resources
+  }
+}
+
 void loop()
 {
+  // Only continue this loop if we are connected to the wifi
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("WiFi Disconnected. Waiting 5 seconds before trying again...");
+    delay(5000);
+    return;
+  }
+
+  handleHeartbeat();
 }
