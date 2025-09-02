@@ -1,8 +1,19 @@
 #include <cameraServo.h>
 #include <ESP32Servo.h>
+#include <Preferences.h>
+
+#define RW_MODE false
+#define RO_MODE true
+#define NVS_NAMESPACE "rearCamera"
 
 CameraServo::CameraServo(int pin)
 {
+  // initialize flash memory
+  Preferences prefs;
+  prefs.begin(NVS_NAMESPACE, RW_MODE);
+  pos = prefs.getUInt("pos", 0);
+  prefs.end();
+
   // Allow allocation of all timers (optional, but recommended for multiple servos)
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
@@ -11,8 +22,9 @@ CameraServo::CameraServo(int pin)
 
   s.setPeriodHertz(50); // Standard 50 Hz servo frequency
   s.attach(pin);
-  s.write(0);
-  pos = 0;
+
+  // Ensure we are at the correct position
+  s.write(pos);
 }
 
 void CameraServo::moveSlowlyTo(int newPos)
@@ -30,4 +42,9 @@ void CameraServo::moveSlowlyTo(int newPos)
     s.write(pos);
     delay(10);
   }
+
+  Preferences prefs;
+  prefs.begin(NVS_NAMESPACE, RW_MODE);
+  prefs.putUInt("pos", newPos);
+  prefs.end();
 }
