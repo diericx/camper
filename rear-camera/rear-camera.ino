@@ -9,7 +9,7 @@ const long timeoutTime = 2000;
 WiFiServer server(8080);
 
 Servo myservo = Servo();
-int servoPin = 9; // D9
+int servoPin = 10; // D9
 int servoPos = 0;
 const int MAX_SERVO_POS = 100;
 
