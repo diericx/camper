@@ -110,6 +110,7 @@ void WebServer::handleHTTPRequest()
     client.println("HTTP/1.1 400 Bad Request");
     client.println("Connection: close");
     client.println();
+    client.stop();
     return;
   }
 
@@ -121,7 +122,6 @@ void WebServer::handleHTTPRequest()
 
   if (handlers.count(route))
   {
-    Serial.println("Found!");
     std::string response = handlers[route](verb, path, body.c_str());
     client.println("HTTP/1.1 200 OK");
     client.println("Content-type:text/plain");

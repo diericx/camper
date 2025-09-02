@@ -10,10 +10,7 @@ WebServer webServer(8080);
 
 std::string handleHello(const std::string &verb, const std::string &path, const std::string &body)
 {
-  Serial.println(verb.c_str());
-  Serial.println(verb.c_str());
-  Serial.println(body.c_str());
-  return "{\"status\":\"success\"}";
+  return "done";
 }
 
 void setup()
