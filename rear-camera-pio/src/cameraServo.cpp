@@ -8,12 +8,6 @@
 
 CameraServo::CameraServo(int pin)
 {
-  // initialize flash memory
-  Preferences prefs;
-  prefs.begin(NVS_NAMESPACE, RW_MODE);
-  pos = prefs.getUInt("pos", 0);
-  prefs.end();
-
   // Allow allocation of all timers (optional, but recommended for multiple servos)
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
@@ -42,9 +36,4 @@ void CameraServo::moveSlowlyTo(int newPos)
     s.write(pos);
     delay(10);
   }
-
-  Preferences prefs;
-  prefs.begin(NVS_NAMESPACE, RW_MODE);
-  prefs.putUInt("pos", newPos);
-  prefs.end();
 }

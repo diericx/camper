@@ -1,29 +1,66 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 #include <cameraServo.h>
-#include <webServer.h>
 #include <secrets.h>
 
 CameraServo cameraServo(9);
-WebServer webServer(8080);
 
-std::string handleHello(const std::string &verb, const std::string &path, const std::string &body)
+AsyncWebServer server(8080);
+
+class MoveHandler
 {
-  return "done";
-}
+public:
+  static void handleRequest(AsyncWebServerRequest *request)
+  {
+    if (request->hasParam("who", true))
+    {
+      String pos = request->getParam("pos", true)->value();
+      Serial.println(pos);
+    }
+    request->send(200, "text/plain", "OK");
+  }
+};
 
 void setup()
 {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(SECRET_SSID, SECRET_PASS);
+  if (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
+    Serial.printf("WiFi Failed!\n");
+    return;
+  }
 
-  webServer.addRoute("POST", "/hello", handleHello);
-  webServer.begin();
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP()); // Print the assigned IP address
+  Serial.print("Gateway IP address: ");
+  Serial.println(WiFi.gatewayIP());
+
+  server.on("/api/v1/move", HTTP_POST,
+            [](AsyncWebServerRequest *request)
+            {
+              if (!request->hasParam("pos"))
+              {
+                request->send(400, "text/plain", "pos param required");
+                return;
+              }
+
+              String pos = request->getParam("pos")->value();
+
+              cameraServo.moveSlowlyTo(pos.toInt());
+
+              request->send(200, "text/plain", "OK");
+            });
+
+  server.begin();
 }
 
 void loop()
 {
-  webServer.handleHTTPRequest();
 }
