@@ -56,6 +56,7 @@ void setup()
   if (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
     Serial.printf("WiFi Failed!\n");
+    delay(2000);
     ESP.restart();
     return;
   }
