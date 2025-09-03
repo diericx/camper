@@ -80,13 +80,11 @@ void handleHeartbeat()
 
     String payload = "{\"device-type\":\"REAR_CAMERA\"}";
 
-    int httpResponseCode = http.PUT(payload); // Or http.POST() for POST requests
+    int httpResponseCode = http.PUT(payload);
 
     if (httpResponseCode > 0)
     {
-      // Serial.printf("HTTP Response code: %d\n", httpResponseCode);
       String payload = http.getString();
-      // Serial.println(payload);
     }
     else
     {
