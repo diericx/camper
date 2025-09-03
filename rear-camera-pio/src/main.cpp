@@ -3,6 +3,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <HTTPClient.h>
+#include <nvs_flash.h>
 
 #include <cameraServo.h>
 #include <secrets.h>
@@ -10,7 +11,7 @@
 unsigned long heartbeatLastSent = 0;
 const long HEARTBEAT_INTERVAL = 5000; // 5 seconds in milliseconds
 
-CameraServo cameraServo(9);
+CameraServo cameraServo;
 
 AsyncWebServer server(8080);
 
@@ -31,6 +32,25 @@ public:
 void setup()
 {
   Serial.begin(115200);
+
+  // Initialize NVS
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+  {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+  // Allow allocation of all timers (optional, but recommended for multiple servos)
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+
+  // Only initialize servo (and subsequently access nvs) after nvs has been initialized
+  cameraServo.init(9);
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(SECRET_SSID, SECRET_PASS);
   if (WiFi.waitForConnectResult() != WL_CONNECTED)
