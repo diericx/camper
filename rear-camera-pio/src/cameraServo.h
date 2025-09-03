@@ -12,7 +12,6 @@ private:
     void loadPosition();
 
 public:
-    CameraServo();
     void init(int pin);
     void moveSlowlyTo(int newPos);
     int getCurrentPosition();
