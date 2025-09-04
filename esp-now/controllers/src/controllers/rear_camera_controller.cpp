@@ -27,8 +27,14 @@ void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   Serial.println();
 }
 
+void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+}
+
 void RearCameraController::init()
 {
+  esp_now_register_recv_cb(OnRecv);
+  esp_now_register_send_cb(OnSent);
 }
 
 void RearCameraController::update()
