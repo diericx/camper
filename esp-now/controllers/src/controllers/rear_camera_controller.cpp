@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include "messages.h"
 
-RearCameraController rearCamController;
+RearCameraController controller;
 
 // callback function that will be executed when data is received
 void RearCameraController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)

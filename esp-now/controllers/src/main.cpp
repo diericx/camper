@@ -24,18 +24,12 @@ void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   Header header;
   memcpy(&header, incomingData, sizeof(header));
 
-#ifdef DEVICE_ROLE_MAIN_CONTROLLER
-  mainController.onRecv(header, mac, incomingData, len);
-#elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
-  rearCamController.onRecv(header, mac, incomingData, len);
-#endif
+  controller.onRecv(header, mac, incomingData, len);
 }
 
 void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-#ifdef DEVICE_ROLE_MAIN_CONTROLLER
-  mainController.onSent(mac_addr, status);
-#endif
+  controller.onSent(mac_addr, status);
 }
 
 void setup()
@@ -55,11 +49,7 @@ void setup()
     return;
   }
 
-#ifdef DEVICE_ROLE_MAIN_CONTROLLER
-  mainController.init();
-#elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
-  rearCamController.init();
-#endif
+  controller.init();
 
   esp_now_register_recv_cb(OnRecv);
   esp_now_register_send_cb(OnSent);
@@ -67,10 +57,5 @@ void setup()
 
 void loop()
 {
-#ifdef DEVICE_ROLE_MAIN_CONTROLLER
-  mainController.update();
-#elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
-  rearCamController.update();
-#endif
-  // put your main code here, to run repeatedly:
+  controller.update();
 }

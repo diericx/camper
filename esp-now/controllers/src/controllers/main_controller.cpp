@@ -7,7 +7,7 @@ uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 esp_now_peer_info_t peerInfo;
 
-MainController mainController;
+MainController controller;
 
 // callback function that will be executed when data is received
 void MainController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
