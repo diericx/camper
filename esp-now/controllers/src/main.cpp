@@ -11,6 +11,19 @@
 #error "No device role defined! Use -DDEVICE_ROLE_MAIN_CONTROLLER or similar"
 #endif
 
+void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+{
+#ifdef DEVICE_ROLE_MAIN_CONTROLLER
+  mainController.onRecv(mac, incomingData, len);
+#elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
+  rearCamController.init();
+#endif
+}
+
+void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+}
+
 void setup()
 {
   // Init Serial Monitor
@@ -32,6 +45,9 @@ void setup()
 #elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
   rearCamController.init();
 #endif
+
+  esp_now_register_recv_cb(OnRecv);
+  esp_now_register_send_cb(OnSent);
 }
 
 void loop()
