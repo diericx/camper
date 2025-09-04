@@ -18,7 +18,12 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   Serial.print("Dest type: ");
   Serial.println(header.dest);
   Serial.print("Msg type: ");
-  Serial.println(header.msgType);
+  Serial.println(MessageTypeToString(header.msgType));
+
+  Heartbeat msg;
+  memcpy(&msg, incomingData, sizeof(msg));
+  Serial.print("Heartbeat Content: ");
+  Serial.println(msg.msg);
   Serial.println();
 }
 

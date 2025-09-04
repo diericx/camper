@@ -9,6 +9,17 @@ enum class MessageType : uint8_t
   Heartbeat
 };
 
+String MessageTypeToString(MessageType t)
+{
+  switch (t)
+  {
+  case MessageType::Heartbeat:
+    return "HeartBeat";
+  default:
+    return "UNKNOWN";
+  };
+}
+
 struct Header
 {
   ControllerType src;
