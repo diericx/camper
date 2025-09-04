@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include "esp_now.h"
 
 // Include role-specific headers
 #ifdef DEVICE_ROLE_MAIN_CONTROLLER
@@ -15,6 +16,13 @@ void setup()
   // Init Serial Monitor
   Serial.begin(115200);
   delay(1000);
+
+  // Init ESP-NOW
+  if (esp_now_init() != ESP_OK)
+  {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
