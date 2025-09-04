@@ -1,14 +1,11 @@
 #include "rear_camera_controller.h"
-#include <esp_now.h>
+#include "esp_now.h"
 #include <WiFi.h>
 #include "messages.h"
 
 RearCameraController rearCamController;
 
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-// Create a struct_message called myData
-struct_message myData;
 
 esp_now_peer_info_t peerInfo;
 
@@ -47,14 +44,18 @@ void RearCameraController::init()
 
 void RearCameraController::update()
 {
+
+  // Create a struct_message called myData
+  Heartbeat msg;
+
   // Set values to send
-  strcpy(myData.a, "THIS IS A CHAR");
-  myData.b = random(1, 20);
-  myData.c = 1.2;
-  myData.d = false;
+  strcpy(msg.msg, "THIS IS A HEARTBEAT");
+  msg.src = ControllerType::RearCamera;
+  msg.dest = ControllerType::Main;
+  msg.msgType = MessageType::Heartbeat;
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&myData, sizeof(myData));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&msg, sizeof(msg));
 
   if (result == ESP_OK)
   {

@@ -5,23 +5,20 @@
 
 MainController mainController;
 
-// Create a struct_message called myData
-struct_message myData;
-
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
-  memcpy(&myData, incomingData, sizeof(myData));
+  // Create a struct_message called myData
+  Header header;
+  memcpy(&header, incomingData, sizeof(header));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  Serial.print("Char: ");
-  Serial.println(myData.a);
-  Serial.print("Int: ");
-  Serial.println(myData.b);
-  Serial.print("Float: ");
-  Serial.println(myData.c);
-  Serial.print("Bool: ");
-  Serial.println(myData.d);
+  Serial.print("Source type: ");
+  Serial.println(header.src);
+  Serial.print("Dest type: ");
+  Serial.println(header.dest);
+  Serial.print("Msg type: ");
+  Serial.println(header.msgType);
   Serial.println();
 }
 
