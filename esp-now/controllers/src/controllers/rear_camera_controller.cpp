@@ -1,22 +1,11 @@
 #include "rear_camera_controller.h"
 #include <esp_now.h>
 #include <WiFi.h>
+#include "messages.h"
 
 RearCameraController rearCamController;
 
-// REPLACE WITH YOUR RECEIVER MAC Address
-// uint8_t broadcastAddress[] = {0xA0, 0x76, 0x4E, 0x41, 0x04, 0xD4};
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-// Structure example to send data
-// Must match the receiver structure
-typedef struct struct_message
-{
-  char a[32];
-  int b;
-  float c;
-  bool d;
-} struct_message;
 
 // Create a struct_message called myData
 struct_message myData;

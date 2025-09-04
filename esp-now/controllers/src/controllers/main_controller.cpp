@@ -1,18 +1,9 @@
 #include "main_controller.h"
 #include <Arduino.h>
 #include <esp_now.h>
+#include "messages.h"
 
 MainController mainController;
-
-// Structure example to receive data
-// Must match the sender structure
-typedef struct struct_message
-{
-  char a[32];
-  int b;
-  float c;
-  bool d;
-} struct_message;
 
 // Create a struct_message called myData
 struct_message myData;
