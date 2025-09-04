@@ -6,11 +6,9 @@
 RearCameraController rearCamController;
 
 // callback function that will be executed when data is received
-void RearCameraController::onRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+void RearCameraController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   // Create a struct_message called myData
-  Header header;
-  memcpy(&header, incomingData, sizeof(header));
   Serial.print("Bytes received: ");
   Serial.println(len);
   Serial.print("Source type: ");
@@ -27,7 +25,7 @@ void RearCameraController::onRecv(const uint8_t *mac, const uint8_t *incomingDat
   Serial.println();
 }
 
-void RearCameraController::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+void RearCameraController::onSent(Header header, const uint8_t *mac_addr, esp_now_send_status_t status)
 {
 }
 

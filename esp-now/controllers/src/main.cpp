@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "esp_now.h"
+#include "messages.h"
 
 // Include role-specific headers
 #ifdef DEVICE_ROLE_MAIN_CONTROLLER
@@ -11,17 +12,30 @@
 #error "No device role defined! Use -DDEVICE_ROLE_MAIN_CONTROLLER or similar"
 #endif
 
+uint8_t devMacAddress[6];
+
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
+  if (memcmp(mac, devMacAddress, 6) == 0)
+  {
+    return; // Ignore broadcasts from self
+  }
+
+  Header header;
+  memcpy(&header, incomingData, sizeof(header));
+
 #ifdef DEVICE_ROLE_MAIN_CONTROLLER
-  mainController.onRecv(mac, incomingData, len);
+  mainController.onRecv(header, mac, incomingData, len);
 #elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
-  rearCamController.init();
+  rearCamController.onRecv(header, mac, incomingData, len);
 #endif
 }
 
 void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
+#ifdef DEVICE_ROLE_MAIN_CONTROLLER
+  mainController.onSent(mac_addr, status);
+#endif
 }
 
 void setup()
@@ -30,15 +44,16 @@ void setup()
   Serial.begin(115200);
   delay(1000);
 
+  // Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
+  WiFi.macAddress(devMacAddress);
+
   // Init ESP-NOW
   if (esp_now_init() != ESP_OK)
   {
     Serial.println("Error initializing ESP-NOW");
     return;
   }
-
-  // Set device as a Wi-Fi Station
-  WiFi.mode(WIFI_STA);
 
 #ifdef DEVICE_ROLE_MAIN_CONTROLLER
   mainController.init();

@@ -10,11 +10,9 @@ esp_now_peer_info_t peerInfo;
 MainController mainController;
 
 // callback function that will be executed when data is received
-void MainController::onRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
+void MainController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   // Create a struct_message called myData
-  Header header;
-  memcpy(&header, incomingData, sizeof(header));
   Serial.print("Bytes received: ");
   Serial.println(len);
   Serial.print("Source type: ");
@@ -32,7 +30,7 @@ void MainController::onRecv(const uint8_t *mac, const uint8_t *incomingData, int
 }
 
 // callback when data is sent
-void MainController::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+void MainController::onSent(Header header, const uint8_t *mac_addr, esp_now_send_status_t status)
 {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");

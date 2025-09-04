@@ -1,3 +1,8 @@
+#ifndef MESSAGES_H
+#define MESSAGES_H
+
+#include "Arduino.h"
+
 enum ControllerType : uint8_t
 {
   Main,
@@ -9,7 +14,7 @@ enum class MessageType : uint8_t
   Heartbeat
 };
 
-String MessageTypeToString(MessageType t)
+inline String MessageTypeToString(MessageType t)
 {
   switch (t)
   {
@@ -31,3 +36,5 @@ struct Heartbeat : Header
 {
   char msg[32];
 };
+
+#endif
