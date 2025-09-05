@@ -18,11 +18,21 @@ void Dev::RearCam::onRecv(Header header, const uint8_t *mac, const uint8_t *inco
   Serial.print("Msg type: ");
   Serial.println(MessageTypeToString(header.msgType));
 
-  RearCam_MoveTo msg;
-  memcpy(&msg, incomingData, sizeof(msg));
-  Serial.print("MoveTo Pos: ");
-  Serial.println(msg.pos);
-  Serial.println();
+  switch (header.msgType)
+  {
+  case MessageType::RearCam_MoveTo:
+  {
+    RearCam_MoveTo msg;
+    memcpy(&msg, incomingData, sizeof(msg));
+    Serial.print("MoveTo Pos: ");
+    Serial.println(msg.pos);
+    Serial.println();
+    break;
+  }
+  default:
+    Serial.println("WARNING: Unrecognized message type.");
+    break;
+  }
 }
 
 void Dev::RearCam::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
