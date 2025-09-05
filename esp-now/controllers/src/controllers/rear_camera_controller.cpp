@@ -18,10 +18,10 @@ void RearCameraController::onRecv(Header header, const uint8_t *mac, const uint8
   Serial.print("Msg type: ");
   Serial.println(MessageTypeToString(header.msgType));
 
-  Heartbeat msg;
+  RearCam_MoveTo msg;
   memcpy(&msg, incomingData, sizeof(msg));
-  Serial.print("Heartbeat Content: ");
-  Serial.println(msg.msg);
+  Serial.print("MoveTo Pos: ");
+  Serial.println(msg.pos);
   Serial.println();
 }
 

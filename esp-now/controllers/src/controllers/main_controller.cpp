@@ -3,10 +3,10 @@
 #include <esp_now.h>
 #include "messages.h"
 
+const ControllerType DEV_TYPE = ControllerType::Main;
+
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
 esp_now_peer_info_t peerInfo;
-
 MainController controller;
 
 // callback function that will be executed when data is received
@@ -21,12 +21,6 @@ void MainController::onRecv(Header header, const uint8_t *mac, const uint8_t *in
   Serial.println(header.dest);
   Serial.print("Msg type: ");
   Serial.println(MessageTypeToString(header.msgType));
-
-  Heartbeat msg;
-  memcpy(&msg, incomingData, sizeof(msg));
-  Serial.print("Heartbeat Content: ");
-  Serial.println(msg.msg);
-  Serial.println();
 }
 
 // callback when data is sent
@@ -52,13 +46,10 @@ void MainController::init()
 void MainController::update()
 {
   // Create a struct_message called myData
-  Heartbeat msg;
-
-  // Set values to send
-  strcpy(msg.msg, "THIS IS A HEARTBEAT");
-  msg.src = ControllerType::RearCamera;
+  RearCam_MoveTo msg;
+  msg.src = DEV_TYPE;
   msg.dest = ControllerType::Main;
-  msg.msgType = MessageType::Heartbeat;
+  msg.pos = 99;
 
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&msg, sizeof(msg));

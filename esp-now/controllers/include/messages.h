@@ -11,15 +11,15 @@ enum ControllerType : uint8_t
 
 enum class MessageType : uint8_t
 {
-  Heartbeat
+  RearCam_MoveTo
 };
 
 inline String MessageTypeToString(MessageType t)
 {
   switch (t)
   {
-  case MessageType::Heartbeat:
-    return "HeartBeat";
+  case MessageType::RearCam_MoveTo:
+    return "RearCam_MoveTo";
   default:
     return "UNKNOWN";
   };
@@ -32,9 +32,10 @@ struct Header
   MessageType msgType;
 };
 
-struct Heartbeat : Header
+struct RearCam_MoveTo : Header
 {
-  char msg[32];
+  uint8_t pos;
+  MessageType msgType = MessageType::RearCam_MoveTo;
 };
 
 #endif

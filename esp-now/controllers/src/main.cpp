@@ -12,6 +12,9 @@
 #error "No device role defined! Use -DDEVICE_ROLE_MAIN_CONTROLLER or similar"
 #endif
 
+// TODO: Controller -> Dev
+// TODO: Rearcameracontroller -> rearcam
+
 uint8_t devMacAddress[6];
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
