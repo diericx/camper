@@ -3,7 +3,10 @@
 #include <WiFi.h>
 #include "messages.h"
 
-Dev::RearCam dev;
+DevType Dev::RearCam::getDevType() const
+{
+  return DevType::RearCam;
+}
 
 // callback function that will be executed when data is received
 void Dev::RearCam::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
@@ -33,16 +36,4 @@ void Dev::RearCam::onRecv(Header header, const uint8_t *mac, const uint8_t *inco
     Serial.println("WARNING: Unrecognized message type.");
     break;
   }
-}
-
-void Dev::RearCam::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
-{
-}
-
-void Dev::RearCam::init()
-{
-}
-
-void Dev::RearCam::update()
-{
 }

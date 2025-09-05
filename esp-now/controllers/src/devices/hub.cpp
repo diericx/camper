@@ -3,8 +3,10 @@
 #include <esp_now.h>
 #include "messages.h"
 
-esp_now_peer_info_t peerInfo;
-Dev::Hub dev;
+DevType Dev::Hub::getDevType() const
+{
+  return DevType::Hub;
+}
 
 // callback function that will be executed when data is received
 void Dev::Hub::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
@@ -29,7 +31,8 @@ void Dev::Hub::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 
 void Dev::Hub::init()
 {
-  // Register peer(s)
+  // Register broadcast peer(s)
+  esp_now_peer_info_t peerInfo;
   memcpy(peerInfo.peer_addr, BROADCAST_ADDR, 6);
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
@@ -44,7 +47,7 @@ void Dev::Hub::update()
 {
   // Create a struct_message called myData
   RearCam_MoveTo msg;
-  msg.src = DEV_TYPE;
+  msg.src = getDevType();
   msg.dest = DevType::RearCam;
   msg.pos = 99;
 

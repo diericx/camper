@@ -3,16 +3,11 @@
 #include "esp_now.h"
 #include "messages.h"
 
-// Include role-specific headers
-#ifdef DEVICE_ROLE_HUB
 #include "devices/hub.h"
-#elif defined(DEVICE_ROLE_REAR_CAM)
 #include "devices/rear_cam.h"
-#else
-#error "No device role defined! Use -DDEVICE_ROLE_HUB or similar"
-#endif
 
 uint8_t devMacAddress[6];
+std::unique_ptr<Dev::Base> dev;
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
@@ -26,17 +21,17 @@ void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   memcpy(&header, incomingData, sizeof(header));
 
   // Ignore messages directed at another device type
-  if (header.dest != DEV_TYPE)
+  if (header.dest != dev->getDevType())
   {
     return;
   }
 
-  dev.onRecv(header, mac, incomingData, len);
+  dev->onRecv(header, mac, incomingData, len);
 }
 
 void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-  dev.onSent(mac_addr, status);
+  dev->onSent(mac_addr, status);
 }
 
 void setup()
@@ -56,7 +51,7 @@ void setup()
     return;
   }
 
-  dev.init();
+  dev->init();
 
   esp_now_register_recv_cb(OnRecv);
   esp_now_register_send_cb(OnSent);
@@ -64,5 +59,5 @@ void setup()
 
 void loop()
 {
-  dev.update();
+  dev->update();
 }
