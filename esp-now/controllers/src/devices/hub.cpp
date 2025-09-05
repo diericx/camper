@@ -1,16 +1,15 @@
-#include "main_controller.h"
+#include "hub.h"
 #include <Arduino.h>
 #include <esp_now.h>
 #include "messages.h"
 
-const ControllerType DEV_TYPE = ControllerType::Main;
+const ControllerType DEV_TYPE = ControllerType::Hub;
 
-uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 esp_now_peer_info_t peerInfo;
-MainController controller;
+Dev::Hub dev;
 
 // callback function that will be executed when data is received
-void MainController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
+void Dev::Hub::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   // Create a struct_message called myData
   Serial.print("Bytes received: ");
@@ -24,16 +23,16 @@ void MainController::onRecv(Header header, const uint8_t *mac, const uint8_t *in
 }
 
 // callback when data is sent
-void MainController::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+void Dev::Hub::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-void MainController::init()
+void Dev::Hub::init()
 {
   // Register peer(s)
-  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+  memcpy(peerInfo.peer_addr, BROADCAST_ADDR, 6);
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
   if (esp_now_add_peer(&peerInfo) != ESP_OK)
@@ -43,16 +42,16 @@ void MainController::init()
   }
 }
 
-void MainController::update()
+void Dev::Hub::update()
 {
   // Create a struct_message called myData
   RearCam_MoveTo msg;
   msg.src = DEV_TYPE;
-  msg.dest = ControllerType::Main;
+  msg.dest = ControllerType::RearCam;
   msg.pos = 99;
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&msg, sizeof(msg));
+  esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
 
   if (result == ESP_OK)
   {

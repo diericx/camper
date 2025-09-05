@@ -3,10 +3,12 @@
 
 #include "Arduino.h"
 
+const uint8_t BROADCAST_ADDR[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
 enum ControllerType : uint8_t
 {
-  Main,
-  RearCamera,
+  Hub,
+  RearCam,
 };
 
 enum class MessageType : uint8_t

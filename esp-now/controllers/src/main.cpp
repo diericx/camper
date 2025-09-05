@@ -4,16 +4,13 @@
 #include "messages.h"
 
 // Include role-specific headers
-#ifdef DEVICE_ROLE_MAIN_CONTROLLER
-#include "controllers/main_controller.h"
-#elif defined(DEVICE_ROLE_REAR_CAMERA_CONTROLLER)
-#include "controllers/rear_camera_controller.h"
+#ifdef DEVICE_ROLE_HUB
+#include "devices/hub.h"
+#elif defined(DEVICE_ROLE_REAR_CAM)
+#include "devices/rear_cam.h"
 #else
-#error "No device role defined! Use -DDEVICE_ROLE_MAIN_CONTROLLER or similar"
+#error "No device role defined! Use -DDEVICE_ROLE_HUB or similar"
 #endif
-
-// TODO: Controller -> Dev
-// TODO: Rearcameracontroller -> rearcam
 
 uint8_t devMacAddress[6];
 
@@ -27,12 +24,12 @@ void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   Header header;
   memcpy(&header, incomingData, sizeof(header));
 
-  controller.onRecv(header, mac, incomingData, len);
+  dev.onRecv(header, mac, incomingData, len);
 }
 
 void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-  controller.onSent(mac_addr, status);
+  dev.onSent(mac_addr, status);
 }
 
 void setup()
@@ -52,7 +49,7 @@ void setup()
     return;
   }
 
-  controller.init();
+  dev.init();
 
   esp_now_register_recv_cb(OnRecv);
   esp_now_register_send_cb(OnSent);
@@ -60,5 +57,5 @@ void setup()
 
 void loop()
 {
-  controller.update();
+  dev.update();
 }

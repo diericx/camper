@@ -1,12 +1,14 @@
-#include "rear_camera_controller.h"
+#include "rear_cam.h"
 #include "esp_now.h"
 #include <WiFi.h>
 #include "messages.h"
 
-RearCameraController controller;
+const ControllerType DEV_TYPE = ControllerType::RearCam;
+
+Dev::RearCam dev;
 
 // callback function that will be executed when data is received
-void RearCameraController::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
+void Dev::RearCam::onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   // Create a struct_message called myData
   Serial.print("Bytes received: ");
@@ -25,14 +27,14 @@ void RearCameraController::onRecv(Header header, const uint8_t *mac, const uint8
   Serial.println();
 }
 
-void RearCameraController::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+void Dev::RearCam::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
 }
 
-void RearCameraController::init()
+void Dev::RearCam::init()
 {
 }
 
-void RearCameraController::update()
+void Dev::RearCam::update()
 {
 }
