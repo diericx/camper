@@ -3,8 +3,6 @@
 #include <esp_now.h>
 #include "messages.h"
 
-const ControllerType DEV_TYPE = ControllerType::Hub;
-
 esp_now_peer_info_t peerInfo;
 Dev::Hub dev;
 
@@ -47,7 +45,7 @@ void Dev::Hub::update()
   // Create a struct_message called myData
   RearCam_MoveTo msg;
   msg.src = DEV_TYPE;
-  msg.dest = ControllerType::RearCam;
+  msg.dest = DevType::RearCam;
   msg.pos = 99;
 
   // Send message via ESP-NOW

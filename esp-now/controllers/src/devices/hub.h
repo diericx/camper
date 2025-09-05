@@ -1,5 +1,7 @@
 #ifndef DEV_HUB_H
+
 #define DEV_HUB_H
+#define DEV_TYPE DevType::Hub
 
 #include <esp_now.h>
 #include "messages.h"

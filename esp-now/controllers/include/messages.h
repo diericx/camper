@@ -5,7 +5,7 @@
 
 const uint8_t BROADCAST_ADDR[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-enum ControllerType : uint8_t
+enum DevType : uint8_t
 {
   Hub,
   RearCam,
@@ -29,8 +29,8 @@ inline String MessageTypeToString(MessageType t)
 
 struct Header
 {
-  ControllerType src;
-  ControllerType dest;
+  DevType src;
+  DevType dest;
   MessageType msgType;
 };
 

@@ -3,8 +3,6 @@
 #include <WiFi.h>
 #include "messages.h"
 
-const ControllerType DEV_TYPE = ControllerType::RearCam;
-
 Dev::RearCam dev;
 
 // callback function that will be executed when data is received

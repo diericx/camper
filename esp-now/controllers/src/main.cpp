@@ -16,13 +16,20 @@ uint8_t devMacAddress[6];
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
+  // Ignore broadcasts from self
   if (memcmp(mac, devMacAddress, 6) == 0)
   {
-    return; // Ignore broadcasts from self
+    return;
   }
 
   Header header;
   memcpy(&header, incomingData, sizeof(header));
+
+  // Ignore messages directed at another device type
+  if (header.dest != DEV_TYPE)
+  {
+    return;
+  }
 
   dev.onRecv(header, mac, incomingData, len);
 }
