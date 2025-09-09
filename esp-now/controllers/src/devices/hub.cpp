@@ -7,6 +7,7 @@
 #define TOGGLE_SWITCH_PIN 2 // D0
 
 Button toggleSwitch;
+esp_now_peer_info_t broadcastPeerInfo;
 
 DevType Dev::Hub::getDevType() const
 {
@@ -66,11 +67,11 @@ void Dev::Hub::init()
   Serial.println("Toggle switch initialized.");
 
   // Register broadcast peer(s)
-  esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, BROADCAST_ADDR, 6);
-  peerInfo.channel = 0;
-  peerInfo.encrypt = false;
-  if (esp_now_add_peer(&peerInfo) != ESP_OK)
+  memcpy(broadcastPeerInfo.peer_addr, BROADCAST_ADDR, 6);
+  broadcastPeerInfo.channel = 0;
+  broadcastPeerInfo.encrypt = false;
+
+  if (esp_now_add_peer(&broadcastPeerInfo) != ESP_OK)
   {
     Serial.println("Failed to add peer");
     return;
