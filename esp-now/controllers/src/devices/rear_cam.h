@@ -5,14 +5,17 @@
 #include <esp_now.h>
 #include "messages.h"
 #include "base.h"
+#include "cameraServo.h"
 
 namespace Dev
 {
   class RearCam : public Base
   {
   private:
+    CameraServo cameraServo;
+
   public:
-    void init() {};
+    void init();
     void update() {};
     void onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len);
     void onSent(const uint8_t *mac_addr, esp_now_send_status_t status) {};

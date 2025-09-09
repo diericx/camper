@@ -15,6 +15,7 @@
     "ranges": "cpp",
     "span": "cpp",
     "text_encoding": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "istream": "cpp"
   }
 }

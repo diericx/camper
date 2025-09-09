@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "esp_now.h"
-#include "messages.h"
 #include <memory>
 
+#include "messages.h"
 #include "devices/hub.h"
 #include "devices/rear_cam.h"
 #include "button.h"
@@ -48,9 +48,6 @@ void setup()
 {
   // Init Serial Monitor
   Serial.begin(115200);
-  delay(2000);
-
-  Serial.println("Starting setup...");
 
   // Initialize the appropriate device based on build flags
 #ifdef DEVICE_ROLE_HUB
