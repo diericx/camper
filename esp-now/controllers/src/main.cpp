@@ -10,7 +10,6 @@
 
 uint8_t devMacAddress[6];
 std::unique_ptr<Dev::Base> dev;
-Button toggleSwitch;
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
@@ -64,17 +63,6 @@ void setup()
   Serial.println("Warning: No device role defined, running without device functionality");
 #endif
 
-  // Initialize button on pin 9 with 200ms debounce and anonymous callback functions
-  toggleSwitch.init(9, 200, []()
-                    {
-      // Anonymous function called when button is pressed
-      Serial.println("Button pressed!"); }, []()
-                    {
-      // Anonymous function called when button is released
-      Serial.println("Button released!"); });
-
-  Serial.println("Button initialized");
-
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
   WiFi.macAddress(devMacAddress);
@@ -105,5 +93,4 @@ void loop()
   {
     dev->update();
   }
-  toggleSwitch.update();
 }

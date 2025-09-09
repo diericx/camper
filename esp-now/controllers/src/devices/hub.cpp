@@ -2,8 +2,11 @@
 #include <Arduino.h>
 #include <esp_now.h>
 #include "messages.h"
+#include "button.h"
 
-#define TOGGLE_SWITCH_PIN 2 // D7
+#define TOGGLE_SWITCH_PIN 2 // D0
+
+Button toggleSwitch;
 
 DevType Dev::Hub::getDevType() const
 {
@@ -33,6 +36,35 @@ void Dev::Hub::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 
 void Dev::Hub::init()
 {
+  // Initialize button on pin 9 with 200ms debounce and anonymous callback functions
+  toggleSwitch.init(TOGGLE_SWITCH_PIN, 200, [this]()
+                    {
+                      // Anonymous function called when button is pressed
+                      Serial.println("Button pressed!");
+
+                      // Create a struct_message called myData
+                      RearCam_MoveTo msg;
+                      msg.src = this->getDevType();
+                      msg.dest = DevType::RearCam;
+                      msg.pos = 99;
+
+                      // Send message via ESP-NOW
+                      esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
+
+                      if (result == ESP_OK)
+                      {
+                        Serial.println("Sent with success");
+                      }
+                      else
+                      {
+                        Serial.println("Error sending the data");
+                      } }, [this]()
+                    {
+      // Anonymous function called when button is released
+      Serial.println("Button released!"); });
+
+  Serial.println("Toggle switch initialized.");
+
   // Register broadcast peer(s)
   esp_now_peer_info_t peerInfo;
   memcpy(peerInfo.peer_addr, BROADCAST_ADDR, 6);
@@ -47,22 +79,5 @@ void Dev::Hub::init()
 
 void Dev::Hub::update()
 {
-  // Create a struct_message called myData
-  RearCam_MoveTo msg;
-  msg.src = getDevType();
-  msg.dest = DevType::RearCam;
-  msg.pos = 99;
-
-  // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
-
-  if (result == ESP_OK)
-  {
-    Serial.println("Sent with success");
-  }
-  else
-  {
-    Serial.println("Error sending the data");
-  }
-  delay(2000);
+  toggleSwitch.update();
 }
