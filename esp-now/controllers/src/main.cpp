@@ -5,9 +5,11 @@
 
 #include "devices/hub.h"
 #include "devices/rear_cam.h"
+#include "button.h"
 
 uint8_t devMacAddress[6];
 std::unique_ptr<Dev::Base> dev;
+Button toggleSwitch;
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
@@ -40,6 +42,15 @@ void setup()
   Serial.begin(115200);
   delay(1000);
 
+  // Initialize button on pin 9 with 200ms debounce and anonymous callback functions
+  toggleSwitch.init(9, 200, []()
+                    {
+      // Anonymous function called when button is pressed
+      Serial.println("Button pressed!"); }, []()
+                    {
+      // Anonymous function called when button is released
+      Serial.println("Button released!"); });
+
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
   WiFi.macAddress(devMacAddress);
@@ -60,4 +71,5 @@ void setup()
 void loop()
 {
   dev->update();
+  toggleSwitch.update();
 }
