@@ -3,6 +3,8 @@
 #include <esp_now.h>
 #include "messages.h"
 
+#define TOGGLE_SWITCH_PIN 2 // D7
+
 DevType Dev::Hub::getDevType() const
 {
   return DevType::Hub;
