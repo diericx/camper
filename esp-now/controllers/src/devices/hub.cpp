@@ -78,18 +78,13 @@ void Dev::Hub::onButtonReleased()
 
 void Dev::Hub::init()
 {
-  // Initialize button on pin 9 with 200ms debounce and callback functions
+  Dev::Base::init();
+
   toggleSwitch.init(TOGGLE_SWITCH_PIN, 200, [this]()
                     { onButtonPressed(); }, [this]()
                     { onButtonReleased(); });
 
   Serial.println("Toggle switch initialized.");
-
-  if (esp_now_add_peer(&this->broadcastPeerInfo) != ESP_OK)
-  {
-    Serial.println("Failed to add peer");
-    return;
-  }
 }
 
 void Dev::Hub::update()
