@@ -2,6 +2,7 @@
 #include <WiFi.h>
 #include "esp_now.h"
 #include "messages.h"
+#include <memory>
 
 #include "devices/hub.h"
 #include "devices/rear_cam.h"
@@ -13,6 +14,10 @@ Button toggleSwitch;
 
 void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
+  // Only process if device is initialized
+  if (!dev)
+    return;
+
   // Ignore broadcasts from self
   if (memcmp(mac, devMacAddress, 6) == 0)
   {
@@ -33,14 +38,31 @@ void OnRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 
 void OnSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-  dev->onSent(mac_addr, status);
+  // Only process if device is initialized
+  if (dev)
+  {
+    dev->onSent(mac_addr, status);
+  }
 }
 
 void setup()
 {
   // Init Serial Monitor
   Serial.begin(115200);
-  delay(1000);
+  delay(2000);
+
+  Serial.println("Starting setup...");
+
+  // Initialize the appropriate device based on build flags
+#ifdef DEVICE_ROLE_HUB
+  dev.reset(new Dev::Hub());
+  Serial.println("Initialized as Hub device");
+#elif defined(DEVICE_ROLE_REAR_CAM)
+  dev.reset(new Dev::RearCam());
+  Serial.println("Initialized as RearCam device");
+#else
+  Serial.println("Warning: No device role defined, running without device functionality");
+#endif
 
   // Initialize button on pin 9 with 200ms debounce and anonymous callback functions
   toggleSwitch.init(9, 200, []()
@@ -50,6 +72,8 @@ void setup()
                     {
       // Anonymous function called when button is released
       Serial.println("Button released!"); });
+
+  Serial.println("Button initialized");
 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -62,14 +86,24 @@ void setup()
     return;
   }
 
-  dev->init();
+  // Initialize device if it was created
+  if (dev)
+  {
+    dev->init();
+    esp_now_register_recv_cb(OnRecv);
+    esp_now_register_send_cb(OnSent);
+    Serial.println("Device initialized");
+  }
 
-  esp_now_register_recv_cb(OnRecv);
-  esp_now_register_send_cb(OnSent);
+  Serial.println("Setup complete");
 }
 
 void loop()
 {
-  dev->update();
+  // Only update dev if it's been assigned
+  if (dev)
+  {
+    dev->update();
+  }
   toggleSwitch.update();
 }
