@@ -1,5 +1,7 @@
 {
   "files.associations": {
-    "button.h": "c"
-  }
+    "button.h": "c",
+    "functional": "c"
+  },
+  "C_Cpp.default.compilerPath": "/home/zac/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-gcc"
 }

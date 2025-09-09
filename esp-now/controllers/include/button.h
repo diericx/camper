@@ -9,7 +9,7 @@ private:
   std::function<void()> onPressedCallback;
 
 public:
-  void init(int pin, int debounceMs, std::function<void()> onPressedCallback);
+  void init(int pin, int debounceMs, std::function<void()> onPressCallback);
   void update();
 };
 
