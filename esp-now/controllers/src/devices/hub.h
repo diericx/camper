@@ -6,12 +6,19 @@
 #include <esp_now.h>
 #include "messages.h"
 #include "base.h"
+#include "button.h"
 
 namespace Dev
 {
   class Hub : public Base
   {
   private:
+    const int TOGGLE_SWITCH_PIN = 2;
+    Button toggleSwitch;
+
+    void onButtonPressed();
+    void onButtonReleased();
+
   public:
     void init();
     void update();

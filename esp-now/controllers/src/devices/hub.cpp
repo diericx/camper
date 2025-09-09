@@ -1,13 +1,6 @@
 #include "hub.h"
 #include <Arduino.h>
 #include <esp_now.h>
-#include "messages.h"
-#include "button.h"
-
-#define TOGGLE_SWITCH_PIN 2 // D0
-
-Button toggleSwitch;
-esp_now_peer_info_t broadcastPeerInfo;
 
 DevType Dev::Hub::getDevType() const
 {
@@ -35,43 +28,64 @@ void Dev::Hub::onSent(const uint8_t *mac_addr, esp_now_send_status_t status)
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
+void Dev::Hub::onButtonPressed()
+{
+  // Function called when button is pressed
+  Serial.println("Button pressed!");
+
+  // Create a struct_message called myData
+  RearCam_MoveTo msg;
+  msg.src = this->getDevType();
+  msg.dest = DevType::RearCam;
+  msg.pos = 0;
+
+  // Send message via ESP-NOW
+  esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
+
+  if (result == ESP_OK)
+  {
+    Serial.println("Sent with success");
+  }
+  else
+  {
+    Serial.println("Error sending the data");
+  }
+}
+
+void Dev::Hub::onButtonReleased()
+{
+  // Function called when button is pressed
+  Serial.println("Button Released!");
+
+  // Create a struct_message called myData
+  RearCam_MoveTo msg;
+  msg.src = this->getDevType();
+  msg.dest = DevType::RearCam;
+  msg.pos = 90;
+
+  // Send message via ESP-NOW
+  esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
+
+  if (result == ESP_OK)
+  {
+    Serial.println("Sent with success");
+  }
+  else
+  {
+    Serial.println("Error sending the data");
+  }
+}
+
 void Dev::Hub::init()
 {
-  // Initialize button on pin 9 with 200ms debounce and anonymous callback functions
+  // Initialize button on pin 9 with 200ms debounce and callback functions
   toggleSwitch.init(TOGGLE_SWITCH_PIN, 200, [this]()
-                    {
-                      // Anonymous function called when button is pressed
-                      Serial.println("Button pressed!");
-
-                      // Create a struct_message called myData
-                      RearCam_MoveTo msg;
-                      msg.src = this->getDevType();
-                      msg.dest = DevType::RearCam;
-                      msg.pos = 99;
-
-                      // Send message via ESP-NOW
-                      esp_err_t result = esp_now_send(BROADCAST_ADDR, (uint8_t *)&msg, sizeof(msg));
-
-                      if (result == ESP_OK)
-                      {
-                        Serial.println("Sent with success");
-                      }
-                      else
-                      {
-                        Serial.println("Error sending the data");
-                      } }, [this]()
-                    {
-      // Anonymous function called when button is released
-      Serial.println("Button released!"); });
+                    { onButtonPressed(); }, [this]()
+                    { onButtonReleased(); });
 
   Serial.println("Toggle switch initialized.");
 
-  // Register broadcast peer(s)
-  memcpy(broadcastPeerInfo.peer_addr, BROADCAST_ADDR, 6);
-  broadcastPeerInfo.channel = 0;
-  broadcastPeerInfo.encrypt = false;
-
-  if (esp_now_add_peer(&broadcastPeerInfo) != ESP_OK)
+  if (esp_now_add_peer(&this->broadcastPeerInfo) != ESP_OK)
   {
     Serial.println("Failed to add peer");
     return;

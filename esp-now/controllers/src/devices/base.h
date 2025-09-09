@@ -8,8 +8,17 @@ namespace Dev
 {
   class Base
   {
+  protected:
+    esp_now_peer_info_t broadcastPeerInfo;
+
   public:
-    virtual ~Base() = default;
+    virtual ~Base()
+    {
+      // Register broadcast peer(s)
+      memcpy(broadcastPeerInfo.peer_addr, BROADCAST_ADDR, 6);
+      broadcastPeerInfo.channel = 0;
+      broadcastPeerInfo.encrypt = false;
+    };
     virtual void init() = 0;
     virtual void update() = 0;
     virtual void onRecv(Header header, const uint8_t *mac, const uint8_t *incomingData, int len) = 0;

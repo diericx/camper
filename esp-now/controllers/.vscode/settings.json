@@ -3,7 +3,13 @@
     "button.h": "c",
     "functional": "c",
     "memory": "cpp",
-    "cstring": "cpp"
+    "cstring": "cpp",
+    "vector": "cpp",
+    "iosfwd": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "streambuf": "cpp",
+    "tuple": "cpp"
   },
   "C_Cpp.default.compilerPath": "/home/zac/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-gcc"
 }
