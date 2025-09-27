@@ -21,7 +21,7 @@ void Dev::RearCam::init()
   }
   ESP_ERROR_CHECK(ret);
 
-  cameraServo.init(2); // D0
+  cameraServo.init(9); // D9
 }
 
 // callback function that will be executed when data is received
